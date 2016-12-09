@@ -38,7 +38,22 @@ class Log {
         } else {
             $str = date('d/m/Y H:i:s') . " {$tipo}: {$log}\n";
         }
+        $exists = file_exists($file);
         file_put_contents($file, $str, FILE_APPEND | FILE_TEXT);
+        //Se criou o arquivo agora
+        if (!$exists) {
+            chmod($file, 0775);
+            chown($file, 'apache');
+            chgrp($file, 'brudam');
+            //Apagar arquivos com mais de 5 dias
+            foreach (new DirectoryIterator(__DIR__ . "/../logs") as $fileInfo) {
+                if ($fileInfo->isDot())
+                    continue;
+                if (time() - $fileInfo->getCTime() >= 5 * 24 * 60 * 60) {
+                    unlink($fileInfo->getRealPath());
+                }
+            }
+        }
     }
 
     /**
