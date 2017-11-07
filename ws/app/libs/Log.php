@@ -7,7 +7,7 @@
  */
 
 /**
- * Description of Acesso
+ * Description of Log
  *
  * @author Andre
  */
@@ -32,12 +32,20 @@ class Log {
      */
     private static function setLog($tipo, $log) {
         $file = __DIR__ . "/../logs/" . date('Y-m-d') . ".txt";
-        if (is_array($log) || is_object($log)) {
+        if (is_array($log)) {
             $str = date('d/m/Y H:i:s') . " {$tipo}: ";
             $str .= print_r($log, true);
+        } else if (is_object($log)) {
+            if (get_class($log) == "Exception" || is_subclass_of($log, "Exception")) {
+                $str = date('d/m/Y H:i:s') . " {$tipo}: {$log->getTraceAsString()}";
+            } else {
+                $str = date('d/m/Y H:i:s') . " {$tipo}: ";
+                $str .= print_r($log, true);
+            }
         } else {
             $str = date('d/m/Y H:i:s') . " {$tipo}: {$log}\n";
         }
+
         $exists = file_exists($file);
         file_put_contents($file, $str, FILE_APPEND | FILE_TEXT);
         //Se criou o arquivo agora
