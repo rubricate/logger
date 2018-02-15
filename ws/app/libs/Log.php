@@ -17,21 +17,21 @@ class Log {
      * Grava informações no Log com label INFO
      */
     public static function info($info) {
-        self::setLog(DOMINIO . " INFO", $info);
+        self::setLog("INFO", $info);
     }
 
     /**
      * Grava informações no Log com label ERROR
      */
     public static function error($error) {
-        self::setLog(DOMINIO . " ERROR", $error);
+        self::setLog("ERROR", $error);
     }
 
     /**
      * Grava dados no log
      */
     private static function setLog($tipo, $log) {
-        $file = __DIR__ . "/../logs/" . date('Y-m-d') . ".txt";
+        $file = __DIR__ . "/../logs/" . DOMINIO . "_ws_" . date('Y-m-d') . ".txt";
         if (is_array($log)) {
             $str = date('d/m/Y H:i:s') . " {$tipo}: ";
             $str .= print_r($log, true);
@@ -57,7 +57,7 @@ class Log {
             foreach (new DirectoryIterator(__DIR__ . "/../logs") as $fileInfo) {
                 if ($fileInfo->isDot())
                     continue;
-                if (time() - $fileInfo->getCTime() >= 5 * 24 * 60 * 60) {
+                if (time() - $fileInfo->getCTime() >= 432000) {//5 dias ( 5 * 24 * 60 * 60)
                     unlink($fileInfo->getRealPath());
                 }
             }
