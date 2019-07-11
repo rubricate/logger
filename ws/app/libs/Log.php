@@ -50,9 +50,9 @@ class Log {
         file_put_contents($file, $str, FILE_APPEND | FILE_TEXT);
         //Se criou o arquivo agora
         if (!$exists) {
-            chmod($file, 0775);
-            chown($file, 'apache');
-            chgrp($file, 'brudam');
+            @chmod($file, 0777);
+            @chown($file, "apache");
+            @chgrp($file, "brudam");
             //Apagar arquivos com mais de 5 dias
             foreach (new DirectoryIterator(__DIR__ . "/../logs") as $fileInfo) {
                 if ($fileInfo->isDot())
