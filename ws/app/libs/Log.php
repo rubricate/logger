@@ -44,7 +44,7 @@ class Log {
         } else {
             $str = date('d/m/Y H:i:s') . " {$tipo}: {$log}\n";
         }
-
+        
         $logdir = __DIR__ . "/../logs/debug/";
         $file = $logdir . DOMINIO . ".txt";
         if (file_exists($file)) {
