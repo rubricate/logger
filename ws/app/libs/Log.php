@@ -16,15 +16,19 @@ class Log {
     /**
      * Grava informações no Log com label INFO
      */
-    public static function info($info) {
-        self::setLog("INFO", $info);
+    public static function info() {
+        foreach (func_get_args() as $info) {
+            self::setLog("INFO", $info);
+        }
     }
 
     /**
      * Grava informações no Log com label ERROR
      */
-    public static function error($error) {
-        self::setLog("ERROR", $error);
+    public static function error() {
+        foreach (func_get_args() as $error) {
+            self::setLog("ERROR", $error);
+        }
     }
 
     /**
@@ -44,7 +48,7 @@ class Log {
         } else {
             $str = date('d/m/Y H:i:s') . " {$tipo}: {$log}\n";
         }
-        
+
         $logdir = __DIR__ . "/../logs/debug/";
         $file = $logdir . DOMINIO . ".txt";
         if (file_exists($file)) {
