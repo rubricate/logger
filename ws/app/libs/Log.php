@@ -13,12 +13,16 @@
  */
 class Log {
 
+    public static $enabled = false;
+
     /**
      * Grava informações no Log com label INFO
      */
     public static function info() {
-        foreach (func_get_args() as $info) {
-            self::setLog("INFO", $info);
+        if (self::$enabled || defined('ENABLE_LOG')) {
+            foreach (func_get_args() as $info) {
+                self::setLog("INFO", $info);
+            }
         }
     }
 
@@ -26,8 +30,20 @@ class Log {
      * Grava informações no Log com label ERROR
      */
     public static function error() {
-        foreach (func_get_args() as $error) {
-            self::setLog("ERROR", $error);
+        if (self::$enabled || defined('ENABLE_LOG')) {
+            foreach (func_get_args() as $error) {
+                self::setLog("ERROR", $error);
+            }
+        }
+    }
+
+    /**
+     * Grava informações no Log com label ERROR
+     * @param type $error
+     */
+    public static function debug() {
+        foreach (func_get_args() as $debug) {
+            self::setLog("DEBUG", $debug);
         }
     }
 
