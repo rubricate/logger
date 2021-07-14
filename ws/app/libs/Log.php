@@ -13,6 +13,10 @@
  */
 class Log {
 
+    /**
+     * Enable debug mode as default
+     * @var type 
+     */
     public static $enabled = false;
 
     /**
