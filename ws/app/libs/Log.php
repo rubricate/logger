@@ -17,7 +17,7 @@ class Log {
      * Enable debug mode as default
      * @var type 
      */
-    public static $enabled = false;
+    public static $enabled = DOMINIO == 'dev';
 
     /**
      * Grava informações no Log com label INFO
@@ -34,11 +34,11 @@ class Log {
      * Grava informações no Log com label ERROR
      */
     public static function error() {
-        if (self::$enabled || defined('ENABLE_LOG')) {
-            foreach (func_get_args() as $error) {
-                self::setLog("ERROR", $error);
-            }
+//        if (self::$enabled || defined('ENABLE_LOG')) {
+        foreach (func_get_args() as $error) {
+            self::setLog("ERROR", $error);
         }
+//        }
     }
 
     /**
