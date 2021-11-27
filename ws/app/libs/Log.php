@@ -52,46 +52,64 @@ class Log {
     }
 
     /**
+     * Grava informações no Log com label ERROR
+     * @param type $error
+     */
+    public static function trace() {
+        foreach (func_get_args() as $log) {
+            if (is_array($log)) {
+                $str = date('d/m/Y H:i:s') . ": ";
+                $str .= print_r($log, true);
+            } else if (is_object($log)) {
+                if (get_class($log) == "Exception" || is_subclass_of($log, "Exception")) {
+                    $str = date('d/m/Y H:i:s') . ": {$log->getTraceAsString()}";
+                } else {
+                    $str = date('d/m/Y H:i:s') . ": ";
+                    $str .= print_r($log, true);
+                }
+            } else {
+                $str = date('d/m/Y H:i:s') . ": {$log}\n";
+            }
+            self::setLog("TRACE", $str);
+        }
+        $trace = [];
+        foreach (debug_backtrace() as $v) {
+            foreach ($v['args'] as &$arg) {
+                if (is_object($arg)) {
+                    $arg = '(Object)';
+                }
+            }
+            array_push($trace, array_filter($v, function($key) {
+                        return $key != 'object';
+                    }, ARRAY_FILTER_USE_KEY));
+        }
+        $str .= "Trace: " . print_r($trace, true);
+        self::setLog("TRACE", $str);
+    }
+
+    /**
      * Grava dados no log
      */
     private static function setLog($tipo, $log) {
-        if (is_array($log)) {
-            $str = date('d/m/Y H:i:s') . " {$tipo}: ";
-            $str .= print_r($log, true);
-        } else if (is_object($log)) {
-            if (get_class($log) == "Exception" || is_subclass_of($log, "Exception")) {
-                $str = date('d/m/Y H:i:s') . " {$tipo}: {$log->getTraceAsString()}";
-            } else {
+        $logdir = __DIR__ . "/../logs/";
+        if ($tipo != 'TRACE') {
+            if (is_array($log)) {
                 $str = date('d/m/Y H:i:s') . " {$tipo}: ";
                 $str .= print_r($log, true);
-            }
-        } else {
-            $str = date('d/m/Y H:i:s') . " {$tipo}: {$log}\n";
-        }
-
-        $logdir = __DIR__ . "/../logs/debug/";
-        $file = $logdir . DOMINIO . ".txt";
-        if (file_exists($file)) {
-            $trace = [];
-            foreach (debug_backtrace() as $k => $v) {
-                if ($k == 0) {
-                    continue;
+            } else if (is_object($log)) {
+                if (get_class($log) == "Exception" || is_subclass_of($log, "Exception")) {
+                    $str = date('d/m/Y H:i:s') . " {$tipo}: {$log->getTraceAsString()}";
+                } else {
+                    $str = date('d/m/Y H:i:s') . " {$tipo}: ";
+                    $str .= print_r($log, true);
                 }
-                if (array_key_exists('file', $v)) {
-                    foreach ($v['args'] as &$arg) {
-                        if (is_object($arg)) {
-                            $arg = '(Object)';
-                        }
-                    }
-                    array_push($trace, array_filter($v, function($key) {
-                                return $key != 'object';
-                            }, ARRAY_FILTER_USE_KEY));
-                }
+            } else {
+                $str = date('d/m/Y H:i:s') . " {$tipo}: {$log}\n";
             }
-            $str .= "Trace: " . print_r($trace, true);
-        } else {
-            $logdir = __DIR__ . "/../logs/";
             $file = __DIR__ . "/../logs/" . DOMINIO . "_ws_" . date('Y-m-d') . ".txt";
+        } else {
+            $file = __DIR__ . "/../logs/" . DOMINIO . "_ws_trace_" . date('Y-m-d') . ".txt";
+            $str = $log;
         }
         $exists = file_exists($file);
         file_put_contents($file, $str, FILE_APPEND | FILE_TEXT);
