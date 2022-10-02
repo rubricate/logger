@@ -1,0 +1,35 @@
+{
+    "name": "rubricate/logger",
+    "license": "MIT",
+    "description": "PHP Component for general purpose logging",
+    "authors": [
+        {
+            "name": "Estefanio N Santos",
+            "email": "estefanions@gmail.com"
+        },
+        {
+            "name": "Akin Ali Beer",
+            "email": "akinalibeer@gmail.com"
+        },
+        {
+            "name": "Andre Alves",
+            "email": "andre@brudam.com.br"
+        }
+    ],
+    "keywords": [
+        "rubricatephp",
+        "logger"
+    ],
+    "support": {
+        "docs"   : "https://rubricate.github.io/components/logger",
+        "source" : "https://github.com/rubricate/logger"
+    },
+    "autoload": {
+        "psr-4": {
+            "Rubricate\\Logger\\": "Rubricate/Logger/"
+        }
+
+    }
+
+}
+
