@@ -8,6 +8,7 @@ use Rubricate\Logger\ConstLogger as C;
 
 abstract class AbstractLogger
 {
+    protected static $ex = '.txt';
     abstract protected static function getDirFullPath();
     abstract protected static function getPrefixToFile();
 
