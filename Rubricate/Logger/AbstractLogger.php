@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Rubricate\Logger;
 
 ini_set ('xdebug.overload_var_dump', 0);
@@ -93,7 +95,7 @@ abstract class AbstractLogger
         }
     }
 
-    private static function getFile()
+    private static function getFile(): string
     {
         $p = trim(static::getPrefixToFile());
         $d = date('Y-m-d');
@@ -102,7 +104,7 @@ abstract class AbstractLogger
         return $p . $d . $e;
     }
 
-    private static function get($type, $log)
+    private static function get($type, $log): string
     {
         $d = date('Y-m-d H:i:s');
         $s = '%s %s: %s';
@@ -110,7 +112,7 @@ abstract class AbstractLogger
        return sprintf($s, $d, $type, $log);
     }
 
-    private static function getDataToWrite($type, $log)
+    private static function getDataToWrite($type, $log): string
     {
         if (is_array($log) || is_object($log)) {
             return self::get($type, print_r($log, true));
