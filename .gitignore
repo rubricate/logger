@@ -1,0 +1,55 @@
+logs/
+main.php
+TestLog.php
+note/
+
+# Local Environment & Development
+# ----------------------------------------  
+tags
+dev.*
+*.vim
+*.dev.*
+*.dev
+*.dev/
+.vimspector.json
+
+# Local environment configuration
+# ----------------------------------------  
+.env
+.env.local
+
+# PHP Ecosystem & Dependencies
+# ----------------------------------------  
+vendor/
+
+# PHPUnit test runner cache
+# ----------------------------------------  
+.phpunit.result.cache
+
+# Static analysis cache
+# ----------------------------------------  
+.phpstan.cache/
+.psalm.cache/
+
+# IDEs, Editors & OS Metadata
+# ----------------------------------------  
+# JetBrains PhpStorm / IntelliJ
+.idea/
+*.iml
+
+# Visual Studio Code
+# ----------------------------------------  
+.vscode/
+
+# Operating System files
+# ----------------------------------------  
+.DS_Store*
+ehthumbs.db
+Icon?
+Thumbs.db
+
+# Temporary files #
+# ----------------------------------------  
+*.swp
+*.swo
+*~
