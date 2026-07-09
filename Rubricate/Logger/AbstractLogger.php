@@ -4,44 +4,46 @@ declare(strict_types=1);
 
 namespace Rubricate\Logger;
 
-ini_set ('xdebug.overload_var_dump', 0);
-
+use DirectoryIterator;
 use Rubricate\Logger\ConstLogger as C;
+use Throwable;
+
+ini_set('xdebug.overload_var_dump', '0');
 
 abstract class AbstractLogger
 {
-    protected static $ex = '.txt';
-    abstract protected static function getDirFullPath();
-    abstract protected static function getPrefixToFile();
+    protected static string $ex = '.txt';
 
-    public static function info()
+    abstract protected static function getDirFullPath(): string;
+    abstract protected static function getPrefixToFile(): string;
+
+    public static function info(mixed ...$messages): void
     {
-        foreach (func_get_args() as $info) {
+        foreach ($messages as $info) {
             self::set(C::TYPE_INFO, $info);
         }
     }
 
-    public static function error()
+    public static function error(mixed ...$messages): void
     {
-        foreach (func_get_args() as $error) {
+        foreach ($messages as $error) {
             self::set(C::TYPE_ERROR, $error);
         }
     }
 
-    public static function debug()
+    public static function debug(mixed ...$messages): void
     {
-        foreach (func_get_args() as $debug) {
+        foreach ($messages as $debug) {
             self::set(C::TYPE_DEBUG, $debug);
         }
     }
 
-    public static function trace()
+    public static function trace(mixed ...$messages): void
     {
         $type = null;
         $data = '';
 
-        foreach (func_get_args() as $log) {
-
+        foreach ($messages as $log) {
             $data = self::getDataToWrite($type, $log);
             self::set(C::TYPE_TRACE, $data);
         }
@@ -49,102 +51,83 @@ abstract class AbstractLogger
         $trace = [];
 
         foreach (debug_backtrace() as $v) {
-
-            foreach ($v['args'] as &$arg) {
-                if (is_object($arg)) {
-                    $arg = '(Object)';
+            if (isset($v['args'])) {
+                foreach ($v['args'] as &$arg) {
+                    if (is_object($arg)) {
+                        $arg = '(Object)';
+                    }
                 }
             }
 
-            array_push($trace, array_filter($v, function($key) {
-                return $key != 'object';
-            }, ARRAY_FILTER_USE_KEY));
+            $filtered = array_filter($v, static fn($key) => $key !== 'object', ARRAY_FILTER_USE_KEY);
+            $trace[] = $filtered;
         }
 
         $data .= "Trace: " . print_r($trace, true);
         self::set(C::TYPE_TRACE, $data);
     }
 
-    private static function set($type, $log)
+    private static function set(?string $type, mixed $log): void
     {
-        $logdir = static::getDirFullPath();
+        $logdir = rtrim(static::getDirFullPath(), '/') . '/';
         $file   = $logdir . self::getFile('_trace_');
         $data   = '';
 
-        if ($type != C::TYPE_TRACE) {
-            
-            $data  = self::getDataToWrite($type, $log);
+        if ($type !== C::TYPE_TRACE) {
+            $data = self::getDataToWrite($type, $log);
             $file = $logdir . self::getFile();
         }
 
         @file_put_contents($file, $data, FILE_APPEND | FILE_TEXT);
 
         if (!file_exists($file)) {
-
             @chmod($file, C::STORAGE_MOD);
 
-            foreach (new \DirectoryIterator($logdir) as $fileInfo) {
-
-                if (
-                    !$fileInfo->isDot() && !$fileInfo->isDir() &&
-                    time() - $fileInfo->getCTime() >= C::CHANGE_TIME) {
-
+            foreach (new DirectoryIterator($logdir) as $fileInfo) {
+                if (!$fileInfo->isDot() && !$fileInfo->isDir() &&
+                    (time() - $fileInfo->getCTime() >= C::CHANGE_TIME)) {
                     @unlink($fileInfo->getRealPath());
                 }
             }
         }
     }
 
-    private static function getFile(): string
+    private static function getFile(string $suffix = ''): string
     {
         $p = trim(static::getPrefixToFile());
         $d = date('Y-m-d');
-        $e = '.txt';
 
-        return $p . $d . $e;
+        return $p . $suffix . $d . self::$ex;
     }
 
-    private static function get($type, $log): string
+    private static function get(?string $type, string $log): string
     {
         $d = date('Y-m-d H:i:s');
-        $s = '%s %s: %s';
-
-       return sprintf($s, $d, $type, $log);
+        return sprintf('%s %s: %s', $d, $type ?? '', $log);
     }
 
-    private static function getDataToWrite($type, $log): string
+    private static function getDataToWrite(?string $type, mixed $log): string
     {
-        if (is_array($log) || is_object($log)) {
-            return self::get($type, print_r($log, true));
-        }
+        return match (true) {
+            is_array($log) || is_object($log) && !($log instanceof Throwable)
+                => self::get($type, print_r($log, true)),
 
-        if (self::isException($log)) {
-            return self::get($type, $log->getTraceAsString());
-        }
+            $log instanceof Throwable
+                => self::get($type, $log->getTraceAsString()),
 
-        if (is_string($log)) {
-            return self::get($type, $log . PHP_EOL);
-        }
+            is_string($log)
+                => self::get($type, $log . PHP_EOL),
 
-        return self::get($type, self::getVarDump($log));
+            default
+                => self::get($type, self::getVarDump($log)),
+        };
     }
 
-    private static function isException($log)
-    {
-        return (
-            is_object($log) && (
-                (get_class($log) == "Exception") ||
-                is_subclass_of($log, "Exception")
-            ));
-    }
-
-    private static function getVarDump($log)
+    private static function getVarDump(mixed $log): string
     {
         ob_start();
         var_dump($log);
-
-        return ob_get_clean();
+        return (string) ob_get_clean();
     }
-
 }
 
